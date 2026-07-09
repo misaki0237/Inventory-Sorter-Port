@@ -13,8 +13,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 如果需要完整 Git 历史（可选）
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -30,10 +28,10 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build mod with Gradle
-        run: ./gradlew jar --no-daemon  # 改为 jar，跳过 makeChangelog
+        run: ./gradlew build --no-daemon
 
       - name: Upload mod artifacts
         uses: actions/upload-artifact@v4
         with:
           name: forge-1.20.1-mod
-          path: build/libs/*[0-9].jar  # 只上传主 JAR，排除 sources
+          path: build/libs/*[0-9].jar
