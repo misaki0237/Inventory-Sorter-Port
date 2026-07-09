@@ -1,9 +1,8 @@
 package cpw.mods.inventorysorter.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -19,21 +18,29 @@ public class SortButton extends Button {
     }
     
     @Override
-    public void renderWidget(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.getAssetManager().hasResource(BUTTON_TEXTURE)) {
-            // Render with custom texture if available
-            RenderSystem.setShaderTexture(0, BUTTON_TEXTURE);
-            this.isHovered = pMouseX >= this.getX() && pMouseY >= this.getY() && pMouseX < this.getX() + this.width && pMouseY < this.getY() + this.height;
-            int v = this.isHovered ? 18 : 0;
-            if (this.isMouseDown(pMouseX, pMouseY)) {
+        
+        // 1.20.1: 使用 getResourceManager() 检查资源是否存在
+        if (mc.getResourceManager().getResource(BUTTON_TEXTURE).isPresent()) {
+            // 1.20.1: 使用 isHovered() 替代手动计算
+            int v = this.isHovered() ? 18 : 0;
+            if (this.isHovered() && isMouseDown(mouseX, mouseY)) {
                 v = 36;
             }
-            blit(pPoseStack, this.getX(), this.getY(), 0, v, this.width, this.height, 18, 54);
+            
+            // 1.20.1: 使用 GuiGraphics.blit() 替代 GuiComponent.blit()
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            guiGraphics.blit(BUTTON_TEXTURE, this.getX(), this.getY(), 0, v, this.width, this.height, 18, 54);
         } else {
             // Fallback to default button rendering
-            super.renderWidget(pPoseStack, pMouseX, pMouseY, pPartialTicks);
+            super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
         }
+    }
+    
+    // 辅助方法：判断鼠标按下状态
+    private boolean isMouseDown(int mouseX, int mouseY) {
+        return this.isHovered() && Minecraft.getInstance().mouseHandler.isLeftPressed();
     }
     
     @Override
